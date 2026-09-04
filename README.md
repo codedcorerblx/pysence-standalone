@@ -1,8 +1,3 @@
-> [!WARNING]
-> **WARNING:** The current state of standalone can and
-> will interfere with `ropysence` itself due to name matches,
-> it is currently being fixed.
-
 # pysence-standalone
 
 A standalone, fully-customizable Discord Rich Presence. Built as a
@@ -250,3 +245,4 @@ reason.
   brief that started this project). If that's not acceptable for a given
   key, keep that key out of `options.txt` and inject it another way (e.g.
   an environment variable your own fork reads) rather than pasting it in.
+  
