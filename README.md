@@ -1,3 +1,8 @@
+> [!WARNING]
+> **WARNING:** The current state of standalone can and
+> will interfere with `ropysence` itself due to name matches,
+> it is currently being fixed.
+
 # pysence-standalone
 
 A standalone, fully-customizable Discord Rich Presence. Built as a
