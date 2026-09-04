@@ -52,6 +52,17 @@ python tools/preview.py
   same directory. Delete `store.enc` (or
   `SecureStore().delete("discord_tokens")`) to force re-authorization.
 
+## Editing OAuth scopes
+
+`DEFAULT_SCOPES` in `pysence_standalone/discord/oauth.py` is a plain
+**space**-separated string, e.g. `"rpc.activities.write openid"` — not
+`+`-joined (that's only how it looks once URL-encoded in the browser
+address bar). If you widen it, note that Discord will often grant extra
+implied scopes on top of what you asked for (e.g. `sdk.social_layer`
+alongside `rpc`) — `get_access_token()` accounts for this by checking that
+your requested scopes are a *subset* of what's cached, not an exact match,
+so this doesn't force a re-authorization every single run.
+
 ## `options.txt` — fully customizable, empty means off
 
 Every content field is optional. If you leave it blank, **or** it renders
@@ -77,7 +88,7 @@ rpc.button.two.url=""
 script.interval=60                                 # seconds between keep-alive PRESENCE_UPDATE resends
 ```
 
-Full schema, defaults, and comments live in `src/core/options.py`
+Full schema, defaults, and comments live in `pysence_standalone/core/options.py`
 (`OPTION_SCHEMA`) — the source of truth, and what generates the template
 file, so it can't drift out of sync with what the code reads.
 
@@ -162,13 +173,38 @@ script.reconnect.max_delay=300
 script.reconnect.max_attempts=0    # 0 = retry forever
 ```
 
+## Running alongside ropysence
+
+Running both scripts separately doesn't work — each opens its own
+independent Discord Gateway session for your account, and Discord shows
+whichever session sent the most recent presence update, not a merge of
+both. This isn't a bug in either project; multiple activities only show
+together when they're in the **same** `activities[]` array of **one**
+presence update from **one** session.
+
+`tools/run_combined.py` does exactly that: it imports both projects (they
+no longer collide, now that this one is named `pysence_standalone` instead
+of `src`), builds both activities every cycle, and sends them together
+over a single shared connection.
+
+```
+python tools/run_combined.py --ropysence-dir /path/to/ropysence
+```
+
+Set up each project normally first (run each on its own once, fill in its
+`options.txt`, authorize in the browser, and for ropysence enter your
+Roblox cookie) — the combined runner reuses what's already cached in each
+project's own `~/.config/*/` directory rather than asking for anything new.
+Full details, including which project's settings govern the shared
+connection, are in the script's docstring.
+
 ## Project structure
 
 ```
 pysence-standalone/
 ├── run.py                    entry point
 ├── options.txt                created on first run, lives here (not sensitive)
-├── src/
+├── pysence_standalone/        (deliberately NOT named `src` -- see note below)
 │   ├── app.py                  orchestration
 │   ├── presence_builder.py     options + placeholders -> Discord activity dict
 │   ├── core/
@@ -185,7 +221,18 @@ pysence-standalone/
 │       └── assets.py              external-assets image proxy
 └── tools/
     └── preview.py               resolve + print the activity payload, no Discord calls
+    └── run_combined.py          run alongside ropysence, one shared Gateway session
 ```
+
+### A note on the package name
+
+The source package here is `pysence_standalone`, not `src`. ropysence (the
+project this is based on) also names its package `src` — if both projects
+end up importable at once (e.g. both `pip install -e`'d, or both cloned
+into directories on the same `PYTHONPATH`), Python's module cache only
+keeps one `src`, and the other project silently runs the wrong code. Keep
+it named `pysence_standalone` if you fork this further, for the same
+reason.
 
 ## Security notes
 

@@ -28,8 +28,8 @@ about, not fatal, so a stray typo doesn't crash the whole config.
 import json
 from pathlib import Path
 
-from src.core.logging_setup import get_logger
-from src.core.http_api import parse_call as parse_http_call
+from pysence_standalone.core.logging_setup import get_logger
+from pysence_standalone.core.http_api import parse_call as parse_http_call
 
 log = get_logger("options")
 

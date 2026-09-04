@@ -13,10 +13,10 @@ import json
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.core.logging_setup import setup_logging, apply_options
-from src.core.options import load_options
-from src.core.http_api import HttpApiManager
-from src.presence_builder import PresenceBuilder
+from pysence_standalone.core.logging_setup import setup_logging, apply_options
+from pysence_standalone.core.options import load_options
+from pysence_standalone.core.http_api import HttpApiManager
+from pysence_standalone.presence_builder import PresenceBuilder
 
 setup_logging()
 

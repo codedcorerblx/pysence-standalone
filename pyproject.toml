@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.scripts]
-pysence-standalone = "src.app:main"
+pysence-standalone = "pysence_standalone.app:main"
 
 [tool.setuptools]
-packages = ["src", "src.core", "src.discord"]
+packages = ["pysence_standalone", "pysence_standalone.core", "pysence_standalone.discord"]

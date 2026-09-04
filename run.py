@@ -12,7 +12,7 @@ First run:
     tokens encrypted under ~/.config/pysence-standalone/
 
 Every run after that reuses the stored tokens silently until they expire
-or you delete them -- see src/core/secure_store.py
+or you delete them -- see pysence_standalone/core/secure_store.py
 (SecureStore().delete("discord_tokens")), or just delete the config dir.
 
 There is nothing to monitor by default: this doesn't poll any account or
@@ -24,11 +24,11 @@ just fetch once at startup).
 import os
 import sys
 
-# Add the repo root to sys.path so `src` resolves as a package regardless of
+# Add the repo root to sys.path so `pysence_standalone` resolves as a package
 # the current working directory this is launched from.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from src.app import main
+from pysence_standalone.app import main
 
 if __name__ == "__main__":
     main()

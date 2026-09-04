@@ -28,9 +28,9 @@ per resend.
 import json
 import time
 
-from src.core.logging_setup import get_logger
-from src.core.templating import render, render_track_missing, resolve_custom_placeholders
-from src.discord.assets import proxy_image_urls
+from pysence_standalone.core.logging_setup import get_logger
+from pysence_standalone.core.templating import render, render_track_missing, resolve_custom_placeholders
+from pysence_standalone.discord.assets import proxy_image_urls
 
 log = get_logger("presence_builder")
 

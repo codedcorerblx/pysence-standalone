@@ -12,14 +12,14 @@ sends one PRESENCE_UPDATE, and keeps the Gateway socket alive.
 import asyncio
 import sys
 
-from src.core.logging_setup import setup_logging, apply_options, get_logger
-from src.core.secure_store import SecureStore
-from src.core.options import load_options
-from src.core.http_api import HttpApiManager
-from src.core.human_webhook import HumanWebhookNotifier
-from src.discord.oauth import get_access_token, DEFAULT_SCOPES
-from src.discord.gateway import run_gateway_with_reconnect
-from src.presence_builder import PresenceBuilder
+from pysence_standalone.core.logging_setup import setup_logging, apply_options, get_logger
+from pysence_standalone.core.secure_store import SecureStore
+from pysence_standalone.core.options import load_options
+from pysence_standalone.core.http_api import HttpApiManager
+from pysence_standalone.core.human_webhook import HumanWebhookNotifier
+from pysence_standalone.discord.oauth import get_access_token, DEFAULT_SCOPES
+from pysence_standalone.discord.gateway import run_gateway_with_reconnect
+from pysence_standalone.presence_builder import PresenceBuilder
 
 setup_logging()
 log = get_logger("app")

@@ -2,8 +2,10 @@
 Real Gateway connection (wss://gateway.discord.gg): HELLO -> heartbeat loop
 -> IDENTIFY or RESUME (Bearer token, intents=0) -> READY/RESUMED. On top of
 that, a periodic loop calls back into presence_builder every `poll_interval`
-seconds and pushes whatever activity it returns as a PRESENCE_UPDATE
-(opcode 3).
+seconds and pushes whatever activity/activities it returns as a
+PRESENCE_UPDATE (opcode 3). build_activity_fn may return a single activity
+dict, a list of dicts (for showing multiple activities at once from one
+session -- see tools/run_combined.py), or None/[] to send nothing that cycle.
 
 run_gateway_with_reconnect() is the entry point: it wraps a single
 connection attempt (_connect_and_run) in a retry loop with exponential
@@ -30,7 +32,7 @@ import time
 
 import websockets
 
-from src.core.logging_setup import get_logger
+from pysence_standalone.core.logging_setup import get_logger
 
 log = get_logger("discord_gateway")
 
@@ -119,25 +121,37 @@ async def _connect_and_run(access_token: str, build_activity_fn, poll_interval: 
                     # would freeze heartbeats/frame processing for the whole
                     # duration -- easily multiple seconds -- risking the
                     # connection getting killed as a zombie. Offload it.
-                    activity = await loop.run_in_executor(None, build_activity_fn)
+                    #
+                    # May return a single activity dict (the common case),
+                    # a list of activity dicts (combined-mode: multiple
+                    # sources sharing one session, see tools/run_combined.py),
+                    # or None/[] if nothing should be sent this cycle.
+                    result = await loop.run_in_executor(None, build_activity_fn)
                 except Exception as e:
                     log.error("build_activity_fn raised an exception, skipping this cycle: %s", e)
-                    activity = None
+                    result = None
 
-                if activity:
+                if isinstance(result, list):
+                    activities = [a for a in result if a]
+                elif result:
+                    activities = [result]
+                else:
+                    activities = []
+
+                if activities:
                     try:
                         payload = json.dumps({
                             "op": OP_PRESENCE_UPDATE,
-                            "d": {"since": 0, "activities": [activity], "status": status, "afk": False},
+                            "d": {"since": 0, "activities": activities, "status": status, "afk": False},
                         })
                     except (TypeError, ValueError) as e:
-                        log.error("activity dict was not JSON-serializable, skipping this cycle: %s -- activity was: %r", e, activity)
+                        log.error("activity dict was not JSON-serializable, skipping this cycle: %s -- activities were: %r", e, activities)
                         await asyncio.sleep(poll_interval)
                         continue
 
                     try:
                         await safe_send(payload)
-                        log.info("PRESENCE_UPDATE sent")
+                        log.info("PRESENCE_UPDATE sent (%d activit%s)", len(activities), "y" if len(activities) == 1 else "ies")
                     except websockets.ConnectionClosed:
                         log.error("failed to send PRESENCE_UPDATE, connection closed")
                         return

@@ -43,7 +43,7 @@ import time
 
 import requests
 
-from src.core.logging_setup import get_logger
+from pysence_standalone.core.logging_setup import get_logger
 
 log = get_logger("http_api")
 
